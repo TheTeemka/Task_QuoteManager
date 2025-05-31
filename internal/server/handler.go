@@ -1,19 +1,20 @@
 package server
 
 import (
-	"github.com/TheTeemka/Test_QuoteManager/internal/service"
-	"github.com/TheTeemka/Test_QuoteManager/pkg/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/TheTeemka/Task_QuoteManager/internal/service"
+	"github.com/TheTeemka/Task_QuoteManager/pkg/utils"
 )
 
 type QuoteHandler struct {
 	quoteService *service.QuoteService
 }
 
-func NewQuoteHandler() *QuoteHandler {
+func NewQuoteHandler(quoteService *service.QuoteService) *QuoteHandler {
 	return &QuoteHandler{
-		quoteService: service.NewQuoteService(),
+		quoteService: quoteService,
 	}
 }
 
@@ -29,8 +30,8 @@ func (h *QuoteHandler) Create(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if quoteReq.Text == "" {
-		http.Error(w, "Author is required", http.StatusBadRequest)
+	if quoteReq.Quote == "" {
+		http.Error(w, "Quote is required", http.StatusBadRequest)
 		return
 	}
 
@@ -40,28 +41,30 @@ func (h *QuoteHandler) Create(w http.ResponseWriter, req *http.Request) {
 	utils.EncodeJson(w, quote)
 }
 
-func (h *QuoteHandler) GetAll(w http.ResponseWriter, req *http.Request) {
-	quotes := h.quoteService.GetAll()
-
-	w.WriteHeader(http.StatusOK)
-	utils.EncodeJson(w, quotes)
-}
-
-func (h *QuoteHandler) GeyAuthor(w http.ResponseWriter, req *http.Request) {
+func (h *QuoteHandler) Get(w http.ResponseWriter, req *http.Request) {
 	author := req.URL.Query().Get("author")
+	var quotes []*service.Quote
 	if author == "" {
-		http.Error(w, "Author query parameter is required", http.StatusBadRequest)
-		return
+		quotes = h.quoteService.GetAll()
+	} else {
+		quotes = h.quoteService.GetByAuthor(author)
 	}
 
-	quotes := h.quoteService.GetByAuthor(author)
+	w.WriteHeader(http.StatusOK)
+	utils.EncodeJson(w, map[string][]*service.Quote{
+		"quotes": quotes,
+	})
+}
+
+func (h *QuoteHandler) GetRandom(w http.ResponseWriter, req *http.Request) {
+	quote := h.quoteService.GetRandomQuote()
 
 	w.WriteHeader(http.StatusOK)
-	utils.EncodeJson(w, quotes)
+	utils.EncodeJson(w, quote)
 }
 
 func (h *QuoteHandler) DeleteByID(w http.ResponseWriter, req *http.Request) {
-	idStr := req.URL.Query().Get("id")
+	idStr := req.PathValue("id")
 	if idStr == "" {
 		http.Error(w, "ID query parameter is required", http.StatusBadRequest)
 		return
@@ -73,7 +76,10 @@ func (h *QuoteHandler) DeleteByID(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	h.quoteService.DeleteByID(id)
-
+	deleted := h.quoteService.DeleteByID(id)
+	if !deleted {
+		http.Error(w, "Quote not found", http.StatusNotFound)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
