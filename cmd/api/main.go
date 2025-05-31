@@ -19,7 +19,7 @@ func main() {
 	logLevel := flag.String("logLevel", "info", "Log level: debug, info, warn, error")
 	port := flag.String("port", ":8080", "Server port")
 	filepath := flag.String("file", "temirlan_bayangazy_data.json", "file to save data")
-	bePersistent := flag.Bool("bePersistent", false, "enable persistent storage")
+	bePersistent := flag.Bool("persistency", false, "enable persistent storage")
 	flag.Parse()
 
 	setSlog(*logLevel)
@@ -34,9 +34,6 @@ func main() {
 	srv := server.NewServer(*port, *filepath, *bePersistent)
 	srv.Serve()
 }
-
-// Реализуйте базовые unit-тесты для основных обработчиков.
-// Проверьте .gitignore на наличие IDE-файлов.
 
 func setSlog(logLevel string) {
 	var level slog.Level

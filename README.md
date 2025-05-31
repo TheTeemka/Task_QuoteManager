@@ -2,23 +2,6 @@
 
 A simple REST API service for managing quotes written in Go.
 
-## Features
-
-- Create new quotes
-- Get all quotes
-- Get quotes by author
-- Get random quote
-- Delete quote by ID
-- Persistent storage option
-- Configurable logging levels
-
-## Installation
-
-```bash
-git clone https://github.com/TheTeemka/Task_QuoteManager.git
-cd Task_QuoteManager
-go mod download
-```
 
 ## Running the Service
 
@@ -47,7 +30,6 @@ Available options:
 - `-bePersistent` - Enable persistent storage (default false)
 
 ## API Examples
-
 ### Create a new quote
 ```bash
 curl -X POST http://localhost:8080/quotes \
@@ -98,15 +80,4 @@ curl -X DELETE http://localhost:8080/quotes/1
   ]
 }
 ```
-
-
-## Development
-
-Running tests:
-```bash
-make test
-```
-
-## License
-
-MIT License
+e
